@@ -39,7 +39,7 @@ class MediaAction extends Action
             ->mountUsing(function (TiptapEditor $component, ComponentContainer $form, array $arguments) {
                 $source = $arguments['src'] !== ''
                     ? $component->getDirectory() . Str::of($arguments['src'])
-                        ->after($component->getDirectory())
+                    ->after($component->getDirectory())
                     : null;
 
                 $form->fill([
@@ -100,10 +100,10 @@ class MediaAction extends Action
                     TextInput::make('link_text')
                         ->label(trans('filament-tiptap-editor::media-modal.labels.link_text'))
                         ->required()
-                        ->visible(fn (callable $get) => $get('type') == 'document'),
+                        ->visible(fn(callable $get) => $get('type') == 'document'),
                     TextInput::make('alt')
                         ->label(trans('filament-tiptap-editor::media-modal.labels.alt'))
-                        ->hidden(fn (callable $get) => $get('type') == 'document')
+                        ->hidden(fn(callable $get) => $get('type') == 'document')
                         ->hintAction(
                             Action::make('alt_hint_action')
                                 ->label('?')
@@ -116,8 +116,10 @@ class MediaAction extends Action
                         ->label(trans('filament-tiptap-editor::media-modal.labels.lazy'))
                         ->default(false),
                     Group::make([
-                        TextInput::make('width'),
-                        TextInput::make('height'),
+                        TextInput::make('width')
+                            ->label(trans('filament-tiptap-editor::media-modal.labels.width')),
+                        TextInput::make('height')
+                            ->label(trans('filament-tiptap-editor::media-modal.labels.height')),
                     ])->columns(),
                     Hidden::make('type')
                         ->default('document'),
