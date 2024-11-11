@@ -296,6 +296,13 @@ TiptapEditor::make('content')
 > **Note**
 > To use custom blocks you must store your content as JSON.
 
+```php
+use FilamentTiptapEditor\Enums\TiptapOutput;
+
+TiptapEditor::make('content')
+    ->output(FilamentTiptapEditor\TiptapOutput::Json);
+```
+
 There are 3 components you need to create a custom block for Tiptap Editor.
 
 * A block class that extends `TiptapBlock` and defines the settings for the block.
