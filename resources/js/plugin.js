@@ -301,8 +301,6 @@ export default function tiptap({
             return extensions;
         },
         init: function() {
-            this.modalId = this.$el.closest('[x-ref="modalContainer"]')?.getAttribute('wire:key');
-
             let existing = this.$refs.element.querySelector('.tiptap');
             if (existing) {
                 existing.remove();
@@ -348,22 +346,9 @@ export default function tiptap({
                             });
                         }
                     },
-                    onCreate({editor}) {
-                        if (
-                            _this.$store.previous &&
-                            editor.commands.getStatePath() === _this.$store.previous.statePath
-                        ) {
-                            editor.chain().focus()
-                                .setContent(_this.$store.previous.editor.getJSON())
-                                .setTextSelection(_this.$store.previous.editor.state.selection)
-                                .run();
-
-                            _this.updatedAt = Date.now();
-                        }
-                    },
                     onUpdate({editor}) {
-                        _this.updatedAt = Date.now();
                         _this.state = editor.isEmpty ? null : editor.getJSON();
+                        _this.updatedAt = Date.now();
                     },
                     onSelectionUpdate() {
                         _this.updatedAt = Date.now();
@@ -376,16 +361,6 @@ export default function tiptap({
                     },
                 });
             }
-        },
-        handleOpenModal() {
-            if (!this.modalId) return;
-
-            this.$nextTick(() => {
-                this.$store.previous = {
-                    statePath: this.statePath,
-                    editor: editor
-                };
-            })
         },
         isActive(type, opts = {}) {
             return editor.isActive(type, opts)
@@ -533,7 +508,7 @@ export default function tiptap({
             editor
                 .chain()
                 .focus()
-                .extendMarkRange('link')
+                .setTextSelection({from: link.coordinates[0].$from.pos, to: link.coordinates[0].$to.pos})
                 .setLink({
                     href: link.href,
                     id: link.id ?? null,
