@@ -60,7 +60,6 @@
                     x-on:update-block.window="updateBlock($event)"
                     x-on:open-block-settings.window="openBlockSettings($event)"
                     x-on:delete-block.window="deleteBlock()"
-                    x-on:open-modal.window="handleOpenModal()"
                     x-on:locale-change.window="updateLocale($event)"
                     x-trap.noscroll="fullScreenMode"
                 >
