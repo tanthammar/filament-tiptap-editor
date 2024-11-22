@@ -8,7 +8,6 @@ use Filament\Forms\Components\Concerns\HasExtraInputAttributes;
 use Filament\Forms\Components\Concerns\HasPlaceholder;
 use Filament\Forms\Components\Field;
 use Filament\Support\Concerns\HasExtraAlpineAttributes;
-use FilamentTiptapEditor\Actions\OEmbedAction;
 use FilamentTiptapEditor\Actions\SourceAction;
 use FilamentTiptapEditor\Concerns\CanStoreOutput;
 use FilamentTiptapEditor\Concerns\HasCustomActions;
@@ -166,7 +165,7 @@ class TiptapEditor extends Field
 
         $this->registerActions([
             SourceAction::make(),
-            OEmbedAction::make(),
+            fn (): Action => $this->getOEmbedAction(),
             fn (): Action => $this->getGridBuilderAction(),
             fn (): Action => $this->getLinkAction(),
             fn (): Action => $this->getMediaAction(),
