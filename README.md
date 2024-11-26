@@ -233,6 +233,12 @@ You may override the default Grid Builder modal with your own Action and assign 
 
 See `vendor/awcodes/filament-tiptap-editor/src/Actions/GridBuilderAction.php` for implementation.
 
+### OEmbed Modal
+
+You may override the default OEmbed modal with your own Action and assign to the `oembed_action` key in the config file. Make sure the default name for your action is `filament_tiptap_grid`.
+
+See `vendor/awcodes/filament-tiptap-editor/src/Actions/OEmbedAction.php` for implementation.
+
 ### Initial height of editor field
 
 You can add extra input attributes to the field with the `extraInputAttributes()` method. This allows you to do things like set the initial height of the editor.
