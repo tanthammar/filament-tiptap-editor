@@ -223,6 +223,16 @@ export default function tiptap({
                     },
                     shouldShow: ({state, from, to}) => {
                         if (
+                            isActive(state, 'oembed') ||
+                            isActive(state, 'vimeo') ||
+                            isActive(state, 'youtube') ||
+                            isActive(state, 'video') ||
+                            isActive(state, 'tiptapBlock')
+                        ) {
+                            return false;
+                        }
+
+                        if (
                             isActive(state, 'link') ||
                             isActive(state, 'table')
                         ) {
@@ -231,16 +241,6 @@ export default function tiptap({
 
                         if (from !== to) {
                             return true;
-                        }
-
-                        if (
-                            isActive(state, 'oembed') ||
-                            isActive(state, 'vimeo') ||
-                            isActive(state, 'youtube') ||
-                            isActive(state, 'video') ||
-                            isActive(state, 'tiptapBlock')
-                        ) {
-                            return false;
                         }
                     },
                 }))
