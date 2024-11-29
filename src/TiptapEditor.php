@@ -196,6 +196,10 @@ class TiptapEditor extends Field
 
         foreach ($content as $k => $block) {
             if ($block['type'] === 'tiptapBlock') {
+                if (is_string($block['attrs']['data'])) {
+                    $block['attrs']['data'] = $this->parseDataAsString($block['attrs']['data']);
+                }
+
                 $instance = $this->getBlock($block['attrs']['type']);
                 $orderedAttrs = [
                     'preview' => $instance->getPreview($block['attrs']['data'], $component),
@@ -222,12 +226,7 @@ class TiptapEditor extends Field
         foreach ($content as $k => $block) {
             if ($block['type'] === 'tiptapBlock') {
                 if (is_string($block['attrs']['data'])) {
-                    $data = Str::of(json_decode('"' . $block['attrs']['data'] . '"'))
-                        ->after('JSON.parse(\'')
-                        ->beforeLast('\')')
-                        ->toString();
-
-                    $content[$k]['attrs']['data'] = json_decode($data, true);
+                    $content[$k]['attrs']['data'] = $this->parseDataAsString($block['attrs']['data']);
                 }
                 unset($content[$k]['attrs']['statePath']);
                 unset($content[$k]['attrs']['preview']);
@@ -240,6 +239,16 @@ class TiptapEditor extends Field
         $document['content'] = $content;
 
         return $document;
+    }
+
+    public function parseDataAsString(string $data): array
+    {
+        $data = Str::of(json_decode('"' . $data . '"'))
+            ->after('JSON.parse(\'')
+            ->beforeLast('\')')
+            ->toString();
+
+        return json_decode($data, true);
     }
 
     public function getInsertBlockAction(): Action
