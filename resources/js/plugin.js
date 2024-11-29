@@ -159,6 +159,7 @@ export default function tiptap({
    floatingMenuTools = [],
    placeholder = null,
    mergeTags = [],
+  customDocument = null,
 }) {
     let editor = null;
 
@@ -182,8 +183,11 @@ export default function tiptap({
                 return tool.id;
             })
 
+
             let extensions = [
-                Document,
+                customDocument ? Document.extend({
+                    content: customDocument
+                }) : Document ,
                 Text,
                 Paragraph,
                 Dropcursor,

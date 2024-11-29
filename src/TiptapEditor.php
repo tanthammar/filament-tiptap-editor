@@ -49,6 +49,8 @@ class TiptapEditor extends Field
 
     protected bool $shouldShowMergeTagsInBlocksPanel = true;
 
+    protected string | Closure | null $customDocument = null;
+
     protected array $gridLayouts = [
         'two-columns',
         'three-columns',
@@ -382,6 +384,18 @@ class TiptapEditor extends Field
         $this->shouldDisableStylesheet = true;
 
         return $this;
+    }
+
+    public function customDocument(string | Closure | null $customDocument): static
+    {
+        $this->customDocument = $customDocument;
+
+        return $this;
+    }
+
+    public function getCustomDocument(): ?string
+    {
+        return $this->evaluate($this->customDocument);
     }
 
     public function shouldDisableStylesheet(): bool
