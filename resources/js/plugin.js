@@ -207,7 +207,13 @@ export default function tiptap({
             ];
 
             if (placeholder && (!disabled)) {
-                extensions.push(Placeholder.configure({placeholder}));
+                extensions.push(
+                  Placeholder.configure({
+                      placeholder: ({ node }) => {
+                          return nodePlaceholders[node.type.name] || placeholder;
+                      },
+                  })
+                );
             }
 
             if (tools.length) {
