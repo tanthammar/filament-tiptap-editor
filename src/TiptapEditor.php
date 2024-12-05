@@ -53,6 +53,8 @@ class TiptapEditor extends Field
 
     protected array | Closure | null $nodePlaceholders = null;
 
+    protected array | bool | null $showOnlyCurrentPlaceholder = false;
+
     protected array $gridLayouts = [
         'two-columns',
         'three-columns',
@@ -419,6 +421,18 @@ class TiptapEditor extends Field
     public function getNodePlaceholders(): ?array
     {
         return $this->evaluate($this->nodePlaceholders);
+    }
+
+    public function showOnlyCurrentPlaceholder(bool | Closure | null $showOnlyCurrent): static
+    {
+        $this->showOnlyCurrentPlaceholder = $showOnlyCurrent;
+
+        return $this;
+    }
+
+    public function getShowOnlyCurrentPlaceholder(): ?bool
+    {
+        return $this->evaluate($this->showOnlyCurrentPlaceholder);
     }
 
     public function shouldDisableStylesheet(): bool

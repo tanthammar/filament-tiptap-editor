@@ -161,6 +161,7 @@ export default function tiptap({
    mergeTags = [],
    customDocument = null,
    nodePlaceholders = [],
+   showOnlyCurrentPlaceholder = true,
 }) {
     let editor = null;
 
@@ -209,6 +210,7 @@ export default function tiptap({
             if (placeholder && (!disabled)) {
                 extensions.push(
                   Placeholder.configure({
+                      showOnlyCurrent: showOnlyCurrentPlaceholder,
                       placeholder: ({ node }) => {
                           return nodePlaceholders[node.type.name] || placeholder;
                       },

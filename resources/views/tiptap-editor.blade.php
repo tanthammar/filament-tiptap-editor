@@ -10,6 +10,7 @@
     $shouldShowMergeTagsInBlocksPanel = $shouldShowMergeTagsInBlocksPanel();
     $customDocument = $getCustomDocument();
     $nodePlaceholders = $getNodePlaceholders();
+    $showOnlyCurrentPlaceholder = $getShowOnlyCurrentPlaceholder();
 @endphp
 
 <x-dynamic-component
@@ -46,7 +47,8 @@
                         placeholder: @js($getPlaceholder()),
                         mergeTags: @js($mergeTags),
                         customDocument: @js($customDocument),
-                        nodePlaceholders: @js($nodePlaceholders)
+                        nodePlaceholders: @js($nodePlaceholders),
+                        showOnlyCurrentPlaceholder: @js($showOnlyCurrentPlaceholder)
                     })"
                     x-init="$nextTick(() => { init() })"
                     x-on:click.away="blur()"
