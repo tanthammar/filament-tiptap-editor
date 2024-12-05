@@ -51,6 +51,8 @@ class TiptapEditor extends Field
 
     protected string | Closure | null $customDocument = null;
 
+    protected array | Closure | null $nodePlaceholders = null;
+
     protected array $gridLayouts = [
         'two-columns',
         'three-columns',
@@ -405,6 +407,11 @@ class TiptapEditor extends Field
     public function getCustomDocument(): ?string
     {
         return $this->evaluate($this->customDocument);
+    }
+
+    public function getNodePlaceholders(): ?array
+    {
+        return $this->evaluate($this->nodePlaceholders);
     }
 
     public function shouldDisableStylesheet(): bool

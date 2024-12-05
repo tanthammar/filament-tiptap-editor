@@ -159,7 +159,8 @@ export default function tiptap({
    floatingMenuTools = [],
    placeholder = null,
    mergeTags = [],
-  customDocument = null,
+   customDocument = null,
+   nodePlaceholders = [],
 }) {
     let editor = null;
 

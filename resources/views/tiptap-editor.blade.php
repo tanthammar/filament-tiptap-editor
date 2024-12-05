@@ -9,6 +9,7 @@
     $shouldSupportBlocks = $shouldSupportBlocks();
     $shouldShowMergeTagsInBlocksPanel = $shouldShowMergeTagsInBlocksPanel();
     $customDocument = $getCustomDocument();
+    $nodePlaceholders = $getNodePlaceholders();
 @endphp
 
 <x-dynamic-component
@@ -44,7 +45,8 @@
                         floatingMenuTools: @js($floatingMenuTools),
                         placeholder: @js($getPlaceholder()),
                         mergeTags: @js($mergeTags),
-                        customDocument: @js($customDocument)
+                        customDocument: @js($customDocument),
+                        nodePlaceholders: @js($nodePlaceholders)
                     })"
                     x-init="$nextTick(() => { init() })"
                     x-on:click.away="blur()"
