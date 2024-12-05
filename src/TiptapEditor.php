@@ -409,6 +409,13 @@ class TiptapEditor extends Field
         return $this->evaluate($this->customDocument);
     }
 
+    public function nodePlaceholders(array | Closure | null $nodePlaceholders): static
+    {
+        $this->nodePlaceholders = $nodePlaceholders;
+
+        return $this;
+    }
+
     public function getNodePlaceholders(): ?array
     {
         return $this->evaluate($this->nodePlaceholders);
