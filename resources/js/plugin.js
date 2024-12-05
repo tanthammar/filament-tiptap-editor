@@ -207,12 +207,13 @@ export default function tiptap({
                 TiptapBlock,
             ];
 
-            if (placeholder && (!disabled)) {
+            if ((placeholder || nodePlaceholders) && (!disabled)) {
                 extensions.push(
                   Placeholder.configure({
                       showOnlyCurrent: showOnlyCurrentPlaceholder,
                       placeholder: ({ node }) => {
-                          return nodePlaceholders[node.type.name] || placeholder;
+                          const nodeSpecificPlaceholder = nodePlaceholders?.[node.type.name];
+                          return nodeSpecificPlaceholder || placeholder || '';
                       },
                   })
                 );
