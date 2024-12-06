@@ -414,7 +414,6 @@ class TiptapEditor extends Field
     /**
      * Set placeholders for specific node types.
      *
-     * This method allows you to define custom placeholders for different types of nodes.
      * You can provide an associative array where the keys are the node type names and the
      * values are the corresponding placeholders. For instance:
      *
