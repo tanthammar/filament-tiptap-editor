@@ -248,6 +248,22 @@ TiptapEditor::make('content')
     ->extraInputAttributes(['style' => 'min-height: 12rem;']),
 ```
 
+## Colors preset
+
+By default, the ColorPicker shows a picker and a field to set hexadecimal color to selected text. Registering specific colors in config file, you can choose one of them directly in ColorPicker
+To do, simply set your custom colors in config file ```preset_colors``` key
+
+    
+```php
+'preset_colors' => [
+    'primary' => '#f59e0b',
+    'secondary' => '#14b8a6',
+    'red' => '#ef4444',
+    //..
+]
+```
+
+
 ## Bubble and Floating Menus
 
 By default, the editor uses Bubble and Floating menus to help with creating content inline, so you don't have to use the toolbar. If you'd prefer to not use the menus you can disable them on a per-instance basis or globally in the config file.
