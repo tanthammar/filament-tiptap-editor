@@ -502,7 +502,7 @@ TiptapEditor::make('content')
     ->placeholder('Write something...')
 ```
 
-You may also specify a specific placeholder for each node type by using `->nodePlaceholders()`. You should supply a array with the node type names as keys and their placeholders as values:
+You can define specific placeholders for each node type using the `->nodePlaceholders()` method. This method accepts an associative array, where the keys are the node type names, and the values are the corresponding placeholder texts.
 
 ```php
 TiptapEditor::make('content')
@@ -512,7 +512,7 @@ TiptapEditor::make('content')
     ])
 ```
 
-With `showOnlyCurrentPlaceholder`, you can specify if you only want to show the current placeholder or show them all at once:
+The `->showOnlyCurrentPlaceholder()` method allows you to control whether placeholders are shown for all nodes simultaneously or only for the currently active node.
 
 ```php
 TiptapEditor::make('content')
