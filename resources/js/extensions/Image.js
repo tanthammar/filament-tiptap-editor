@@ -39,9 +39,13 @@ export const CustomImage = Image.extend({
       media: {
         default: null,
         parseHTML: element => element.getAttribute('data-media-id'),
-        renderHTML: (attributes) => {
-          if (attributes.media) {
-            return { "data-media-id": attributes.media };
+        renderHTML: attributes => {
+          if (!attributes.media) {
+            return {}
+          }
+
+          return {
+            'data-media-id': attributes.media,
           }
         },
       },
