@@ -235,7 +235,7 @@ See `vendor/awcodes/filament-tiptap-editor/src/Actions/GridBuilderAction.php` fo
 
 ### OEmbed Modal
 
-You may override the default OEmbed modal with your own Action and assign to the `oembed_action` key in the config file. Make sure the default name for your action is `filament_tiptap_grid`.
+You may override the default OEmbed modal with your own Action and assign to the `oembed_action` key in the config file. Make sure the default name for your action is `filament_tiptap_oembed`.
 
 See `vendor/awcodes/filament-tiptap-editor/src/Actions/OEmbedAction.php` for implementation.
 
