@@ -448,6 +448,9 @@ export default function tiptap({
                             width: media?.width,
                             height: media?.height,
                             lazy: media?.lazy,
+                            srcset: media?.srcset,
+                            sizes: media?.srcset,
+                            media: media?.media,
                         })
                         .run();
                 } else {
