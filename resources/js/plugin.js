@@ -449,7 +449,7 @@ export default function tiptap({
                             height: media?.height,
                             lazy: media?.lazy,
                             srcset: media?.srcset,
-                            sizes: media?.srcset,
+                            sizes: media?.sizes,
                             media: media?.media,
                         })
                         .run();
