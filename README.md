@@ -493,6 +493,33 @@ If you are using any of the tools that require a modal (e.g. Insert media, Inser
 {{ $this->modal }}
 ```
 
+### Placeholders
+
+You can easily set a placeholder, the Filament way:
+
+```php
+TiptapEditor::make('content')
+    ->placeholder('Write something...')
+```
+
+You may also specify a specific placeholder for each node type by using `->nodePlaceholders()`. You should supply a array with the node type names as keys and their placeholders as values:
+
+```php
+TiptapEditor::make('content')
+    ->nodePlaceholders([
+        'paragraph' => 'Start writing your paragraph...',
+        'heading' => 'Insert a heading...',
+    ])
+```
+
+With `showOnlyCurrentPlaceholder`, you can specify if you only want to show the current placeholder or show them all at once:
+
+```php
+TiptapEditor::make('content')
+    // All nodes will immediately be displayed, instead of only the selected node
+    ->showOnlyCurrentPlaceholder(false)
+```
+
 ## Custom Extensions
 
 You can add your own extensions to the editor by creating the necessary files and adding them to the config file extensions array.
