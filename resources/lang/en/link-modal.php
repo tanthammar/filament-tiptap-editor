@@ -6,7 +6,7 @@ return [
         'insert' => 'Insert Link',
     ],
     'buttons' => [
-        'remove' => 'Remove Link',
+        'remove_link' => 'Remove Link',
         'cancel' => 'Cancel',
         'update' => 'Update',
         'insert' => 'Insert',

@@ -6,7 +6,7 @@ return [
         'insert' => 'إدراج رابط',
     ],
     'buttons' => [
-        'remove' => 'إزالة الرابط',
+        'remove_link' => 'إزالة الرابط',
         'cancel' => 'إلغاء',
         'update' => 'تحديث',
         'insert' => 'إدراج',

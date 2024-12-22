@@ -6,7 +6,7 @@ return [
         'insert' => 'درج لینک',
     ],
     'buttons' => [
-        'remove' => 'حذف لینک',
+        'remove_link' => 'حذف لینک',
         'cancel' => 'لغو',
         'update' => 'به روز رسانی',
         'insert' => 'درج',

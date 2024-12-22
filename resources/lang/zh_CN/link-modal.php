@@ -6,7 +6,7 @@ return [
         'insert' => '插入链接',
     ],
     'buttons' => [
-        'remove' => '移除',
+        'remove_link' => '移除',
         'cancel' => '取消',
         'update' => '更新',
         'insert' => '插入',

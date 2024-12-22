@@ -6,7 +6,7 @@ return [
         'insert' => 'Insertar Enlace',
     ],
     'buttons' => [
-        'remove' => 'Eliminar Enlace',
+        'remove_link' => 'Eliminar Enlace',
         'cancel' => 'Cancelar',
         'update' => 'Actualizar',
         'insert' => 'Insertar',

@@ -6,7 +6,7 @@ return [
         'insert' => 'Chèn đường dẫn',
     ],
     'buttons' => [
-        'remove' => 'Xóa đường dẫn',
+        'remove_link' => 'Xóa đường dẫn',
         'cancel' => 'Hủy',
         'update' => 'Cập nhật',
         'insert' => 'Chèn',

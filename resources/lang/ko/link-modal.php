@@ -6,7 +6,7 @@ return [
         'insert' => '링크 삽입',
     ],
     'buttons' => [
-        'remove' => '링크 제거',
+        'remove_link' => '링크 제거',
         'cancel' => '취소',
         'update' => '업데이트',
         'insert' => '삽입',

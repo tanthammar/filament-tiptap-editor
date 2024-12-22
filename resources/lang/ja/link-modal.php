@@ -6,7 +6,7 @@ return [
         'insert' => 'リンクを挿入',
     ],
     'buttons' => [
-        'remove' => 'リンクを削除',
+        'remove_link' => 'リンクを削除',
         'cancel' => 'キャンセル',
         'update' => '更新',
         'insert' => '挿入',
