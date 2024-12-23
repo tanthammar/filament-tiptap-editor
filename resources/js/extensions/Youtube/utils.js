@@ -7,47 +7,55 @@ export const getYoutubeEmbedUrl = (nocookie = false) => {
 };
 
 export const getEmbedURLFromYoutubeURL = (options) => {
-  const { url, controls, nocookie, startAt } = options;
+    const { url, controls, nocookie, startAt } = options;
 
-  // if is already an embed url, return it
-  if (url.includes("/embed/")) {
-    return url;
-  }
+    let id = null;
 
-  // if is a youtu.be url, get the id after the /
-  if (url.includes("youtu.be")) {
-    const id = url.split("/").pop();
+    // Already an embed URL
+    if (url.includes("/embed/")) {
+        return url;
+    }
+
+    // Extract the video ID for youtu.be URLs
+    if (url.includes("youtu.be")) {
+        id = url.split("/").pop();
+    }
+
+    // Extract the video ID for /shorts/ URLs
+    if (url.includes("/shorts/")) {
+        id = url.split("/shorts/").pop();
+    }
+
+    // Extract the video ID for standard YouTube URLs (?v=)
+    if (!id) {
+        const videoIdRegex = /v=([-\w]+)/gm;
+        const matches = videoIdRegex.exec(url);
+        if (matches && matches[1]) {
+            id = matches[1];
+        }
+    }
 
     if (!id) {
-      return null;
+        return null;
     }
-    return `${getYoutubeEmbedUrl(nocookie)}${id}`;
-  }
 
-  const videoIdRegex = /v=([-\w]+)/gm;
-  const matches = videoIdRegex.exec(url);
+    let outputUrl = `${getYoutubeEmbedUrl(nocookie)}${id}`;
 
-  if (!matches || !matches[1]) {
-    return null;
-  }
+    const params = [];
 
-  let outputUrl = `${getYoutubeEmbedUrl(nocookie)}${matches[1]}`;
+    if (!controls) {
+        params.push("controls=0");
+    } else {
+        params.push("controls=1");
+    }
 
-  const params = [];
+    if (startAt) {
+        params.push(`start=${startAt}`);
+    }
 
-  if (!controls) {
-    params.push("controls=0");
-  } else {
-    params.push("controls=1");
-  }
+    if (params.length) {
+        outputUrl += `?${params.join("&")}`;
+    }
 
-  if (startAt) {
-    params.push(`start=${startAt}`);
-  }
-
-  if (params.length) {
-    outputUrl += `?${params.join("&")}`;
-  }
-
-  return outputUrl;
+    return outputUrl;
 };
