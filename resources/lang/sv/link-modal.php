@@ -6,7 +6,7 @@ return [
         'insert' => 'Infoga länk',
     ],
     'buttons' => [
-        'remove_link' => 'Ta bort länk',
+        'remove' => 'Ta bort länk',
         'cancel' => 'Avbryt',
         'update' => 'Uppdatera',
         'insert' => 'Infoga',

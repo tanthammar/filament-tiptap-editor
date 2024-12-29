@@ -101,7 +101,6 @@ class LinkAction extends Action
                 if ($action->getArguments()['href'] !== '') {
                     return [
                         $action->makeModalSubmitAction('remove_link', [])
-                            ->label(trans('filament-tiptap-editor::link-modal.buttons.remove_link'))
                             ->color('danger')
                             ->extraAttributes(function () use ($action) {
                                 return [

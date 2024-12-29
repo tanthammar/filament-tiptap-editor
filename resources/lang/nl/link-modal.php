@@ -6,7 +6,7 @@ return [
         'insert' => 'Link invoegen',
     ],
     'buttons' => [
-        'remove_link' => 'Link verwijderen',
+        'remove' => 'Link verwijderen',
         'cancel' => 'Annuleren',
         'update' => 'Bijwerken',
         'insert' => 'Invoegen',

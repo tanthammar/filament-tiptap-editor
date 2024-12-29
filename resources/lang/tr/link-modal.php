@@ -6,7 +6,7 @@ return [
         'insert' => 'Bağlantı Ekle',
     ],
     'buttons' => [
-        'remove_link' => 'Bağlantıyı Kaldır',
+        'remove' => 'Bağlantıyı Kaldır',
         'cancel' => 'İptal',
         'update' => 'Güncelle',
         'insert' => 'Ekle',
