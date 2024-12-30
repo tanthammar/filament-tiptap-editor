@@ -680,12 +680,13 @@
     font-family: theme("fontFamily.mono") monospace;
 }
 
-.tiptap-editor p.is-editor-empty:first-child::before {
+.tiptap-editor p.is-editor-empty:first-child::before,
+.tiptap-wrapper .is-empty::before {
     content: attr(data-placeholder);
     float: left;
     height: 0;
     pointer-events: none;
-    @apply text-gray-400 dark:text-gray-500;
+    @apply text-gray-400 dark:text-gray-500 float-left h-0 pointer-events-none;
 }
 
 .tippy-content-p-0 {
@@ -694,9 +695,4 @@
 
 span[data-type="mergeTag"] {
     @apply bg-gray-100 dark:bg-gray-800 px-2 py-1 mx-1 rounded;
-}
-
-.tiptap-wrapper .is-empty::before {
-    @apply text-gray-400 float-left h-0 pointer-events-none;
-    content: attr(data-placeholder);
 }
