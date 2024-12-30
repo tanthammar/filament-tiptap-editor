@@ -695,3 +695,8 @@
 span[data-type="mergeTag"] {
     @apply bg-gray-100 dark:bg-gray-800 px-2 py-1 mx-1 rounded;
 }
+
+.tiptap-wrapper .is-empty::before {
+    @apply text-gray-400 float-left h-0 pointer-events-none;
+    content: attr(data-placeholder);
+}
