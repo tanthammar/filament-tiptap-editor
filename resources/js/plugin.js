@@ -270,6 +270,9 @@ export default function tiptap({
                             appendTo: this.$refs.element,
                             zIndex: 10,
                         },
+                        shouldShow: ({state, from, to}) => {
+                           return isActive(state, 'paragraph');
+                       }
                     }))
 
                     this.floatingMenuTools.forEach((tool) => {
