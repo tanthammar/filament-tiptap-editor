@@ -235,7 +235,7 @@ See `vendor/awcodes/filament-tiptap-editor/src/Actions/GridBuilderAction.php` fo
 
 ### OEmbed Modal
 
-You may override the default OEmbed modal with your own Action and assign to the `oembed_action` key in the config file. Make sure the default name for your action is `filament_tiptap_grid`.
+You may override the default OEmbed modal with your own Action and assign to the `oembed_action` key in the config file. Make sure the default name for your action is `filament_tiptap_oembed`.
 
 See `vendor/awcodes/filament-tiptap-editor/src/Actions/OEmbedAction.php` for implementation.
 
@@ -247,6 +247,22 @@ You can add extra input attributes to the field with the `extraInputAttributes()
 TiptapEditor::make('content')
     ->extraInputAttributes(['style' => 'min-height: 12rem;']),
 ```
+
+## Colors preset
+
+By default, the ColorPicker shows a picker and a field to set hexadecimal color to selected text. Registering specific colors in config file, you can choose one of them directly in ColorPicker
+To do, simply set your custom colors in config file ```preset_colors``` key
+
+    
+```php
+'preset_colors' => [
+    'primary' => '#f59e0b',
+    'secondary' => '#14b8a6',
+    'red' => '#ef4444',
+    //..
+]
+```
+
 
 ## Bubble and Floating Menus
 

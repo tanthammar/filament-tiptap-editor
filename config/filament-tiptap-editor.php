@@ -98,4 +98,19 @@ return [
     'extensions_script' => null,
     'extensions_styles' => null,
     'extensions' => [],
+
+    /*
+    |--------------------------------------------------------------------------
+    | PresetColors
+    |--------------------------------------------------------------------------
+    |
+    | Possibility to define presets colors in ColorPicker.
+    | Only hexadecimal value
+    'preset_colors' => [
+        'primary' => '#f59e0b',
+        //..
+    ]
+    |
+    */
+    'preset_colors' => [],
 ];
