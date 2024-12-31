@@ -7,55 +7,55 @@ export const getYoutubeEmbedUrl = (nocookie = false) => {
 };
 
 export const getEmbedURLFromYoutubeURL = (options) => {
-    const { url, controls, nocookie, startAt } = options;
+  const { url, controls, nocookie, startAt } = options;
 
-    let id = null;
+  let id = null;
 
-    // Already an embed URL
-    if (url.includes("/embed/")) {
-        return url;
+  // Already an embed URL
+  if (url.includes("/embed/")) {
+    return url;
+  }
+
+  // Extract the video ID for youtu.be URLs
+  if (url.includes("youtu.be")) {
+    id = url.split("/").pop();
+  }
+
+  // Extract the video ID for /shorts/ URLs
+  if (url.includes("/shorts/")) {
+    id = url.split("/shorts/").pop();
+  }
+
+  // Extract the video ID for standard YouTube URLs (?v=)
+  if (!id) {
+    const videoIdRegex = /v=([-\w]+)/gm;
+    const matches = videoIdRegex.exec(url);
+    if (matches && matches[1]) {
+      id = matches[1];
     }
+  }
 
-    // Extract the video ID for youtu.be URLs
-    if (url.includes("youtu.be")) {
-        id = url.split("/").pop();
-    }
+  if (!id) {
+    return null;
+  }
 
-    // Extract the video ID for /shorts/ URLs
-    if (url.includes("/shorts/")) {
-        id = url.split("/shorts/").pop();
-    }
+  let outputUrl = `${getYoutubeEmbedUrl(nocookie)}${id}`;
 
-    // Extract the video ID for standard YouTube URLs (?v=)
-    if (!id) {
-        const videoIdRegex = /v=([-\w]+)/gm;
-        const matches = videoIdRegex.exec(url);
-        if (matches && matches[1]) {
-            id = matches[1];
-        }
-    }
+  const params = [];
 
-    if (!id) {
-        return null;
-    }
+  if (!controls) {
+    params.push("controls=0");
+  } else {
+    params.push("controls=1");
+  }
 
-    let outputUrl = `${getYoutubeEmbedUrl(nocookie)}${id}`;
+  if (startAt) {
+    params.push(`start=${startAt}`);
+  }
 
-    const params = [];
+  if (params.length) {
+    outputUrl += `?${params.join("&")}`;
+  }
 
-    if (!controls) {
-        params.push("controls=0");
-    } else {
-        params.push("controls=1");
-    }
-
-    if (startAt) {
-        params.push(`start=${startAt}`);
-    }
-
-    if (params.length) {
-        outputUrl += `?${params.join("&")}`;
-    }
-
-    return outputUrl;
+  return outputUrl;
 };
