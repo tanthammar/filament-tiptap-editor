@@ -229,7 +229,7 @@ The Media Modal can make use of 3 attributes not exposed by default:
 
 - `srcset` is used for selecting a series of responsive images to display for different browser viewports. [Docs](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/srcset)
 - `sizes` goes alongside `srcset` to specify sizing rules for responsive images. [Docs](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/sizes)
-- `media` provides support for an arbitrary ID vlaue to better integrate with Media Libraries, so that data about which media was used can be preserved.
+- `media` provides support for an arbitrary ID value to better integrate with Media stored within a Database.
 
 See `vendor/awcodes/filament-tiptap-editor/src/Actions/MediaAction.php` for implementation.
 
