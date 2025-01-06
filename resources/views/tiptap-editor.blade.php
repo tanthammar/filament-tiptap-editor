@@ -108,7 +108,7 @@
                         </template>
                     @endif
 
-                    @if (! $isBubbleMenusDisabled())
+                    @if (! $isDisabled && ! $isBubbleMenusDisabled())
                     <template x-if="editor()">
                         <div>
                             <div x-ref="bubbleMenu" class="tiptap-editor-bubble-menu-wrapper">
