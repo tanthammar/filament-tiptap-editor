@@ -680,7 +680,8 @@
     font-family: theme("fontFamily.mono") monospace;
 }
 
-.tiptap-editor p.is-editor-empty:first-child::before {
+.tiptap-editor p.is-editor-empty:first-child::before,
+.tiptap-wrapper .is-empty::before {
     content: attr(data-placeholder);
     float: left;
     height: 0;

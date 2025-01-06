@@ -51,6 +51,10 @@ class TiptapEditor extends Field
 
     protected string | Closure | null $customDocument = null;
 
+    protected array | Closure | null $nodePlaceholders = null;
+
+    protected array | bool | null $showOnlyCurrentPlaceholder = false;
+
     protected array $gridLayouts = [
         'two-columns',
         'three-columns',
@@ -405,6 +409,44 @@ class TiptapEditor extends Field
     public function getCustomDocument(): ?string
     {
         return $this->evaluate($this->customDocument);
+    }
+
+    /**
+     * Set placeholders for specific node types.
+     *
+     * You can provide an associative array where the keys are the node type names and the
+     * values are the corresponding placeholders. For instance:
+     *
+     * ['heading' => 'What’s the title?', 'paragraph' => 'Start writing here...']
+     * @return $this
+     */
+    public function nodePlaceholders(array | Closure | null $nodePlaceholders): static
+    {
+        $this->nodePlaceholders = $nodePlaceholders;
+
+        return $this;
+    }
+
+    public function getNodePlaceholders(): ?array
+    {
+        return $this->evaluate($this->nodePlaceholders);
+    }
+
+    /**
+     * Show placeholder decorations only in currently selected node.
+     *
+     * @return $this
+     */
+    public function showOnlyCurrentPlaceholder(bool | Closure | null $showOnlyCurrent): static
+    {
+        $this->showOnlyCurrentPlaceholder = $showOnlyCurrent;
+
+        return $this;
+    }
+
+    public function getShowOnlyCurrentPlaceholder(): ?bool
+    {
+        return $this->evaluate($this->showOnlyCurrentPlaceholder);
     }
 
     public function shouldDisableStylesheet(): bool

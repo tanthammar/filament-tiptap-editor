@@ -159,7 +159,9 @@ export default function tiptap({
    floatingMenuTools = [],
    placeholder = null,
    mergeTags = [],
-  customDocument = null,
+   customDocument = null,
+   nodePlaceholders = [],
+   showOnlyCurrentPlaceholder = true,
 }) {
     let editor = null;
 
@@ -205,8 +207,16 @@ export default function tiptap({
                 TiptapBlock,
             ];
 
-            if (placeholder && (!disabled)) {
-                extensions.push(Placeholder.configure({placeholder}));
+            if ((placeholder || nodePlaceholders) && (!disabled)) {
+                extensions.push(
+                  Placeholder.configure({
+                      showOnlyCurrent: showOnlyCurrentPlaceholder,
+                      placeholder: ({ node }) => {
+                          const nodeSpecificPlaceholder = nodePlaceholders?.[node.type.name];
+                          return nodeSpecificPlaceholder || placeholder || '';
+                      },
+                  })
+                );
             }
 
             if (tools.length) {
@@ -260,6 +270,9 @@ export default function tiptap({
                             appendTo: this.$refs.element,
                             zIndex: 10,
                         },
+                        shouldShow: ({state, from, to}) => {
+                           return isActive(state, 'paragraph');
+                       }
                     }))
 
                     this.floatingMenuTools.forEach((tool) => {
