@@ -44,7 +44,13 @@ class Image extends BaseImage
             'media' => [
                 'default' => null,
                 'parseHTML' => fn ($DOMNode) => $DOMNode->getAttribute('data-media-id') ?: null,
-                'renderHTML' => fn ($attributes) => $attributes->media ? ['data-media-id' => $attributes->media] : null,
+                'renderHTML' => function ($attributes) {
+                    if (! property_exists($attributes, 'media')) {
+                        return null;
+                    }
+
+                    return ['data-media-id' => $attributes->media];
+                },
             ],
         ];
     }
