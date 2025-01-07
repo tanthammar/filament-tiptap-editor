@@ -168,7 +168,7 @@ class TiptapConverter
 
         $headings = $this->parseTocHeadings($content['content'], $maxDepth);
 
-        if(empty($headings)) {
+        if (empty($headings)) {
             return $array ? [] : '';
         }
 
