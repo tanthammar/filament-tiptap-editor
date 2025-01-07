@@ -168,6 +168,10 @@ class TiptapConverter
 
         $headings = $this->parseTocHeadings($content['content'], $maxDepth);
 
+        if(empty($headings)) {
+            return $array ? [] : '';
+        }
+
         return $array ?
             $this->generateTOCArray($headings) :
             $this->generateNestedTOC($headings, $headings[0]['level']);
