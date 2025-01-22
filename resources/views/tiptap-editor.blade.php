@@ -48,7 +48,8 @@
                         mergeTags: @js($mergeTags),
                         customDocument: @js($customDocument),
                         nodePlaceholders: @js($nodePlaceholders),
-                        showOnlyCurrentPlaceholder: @js($showOnlyCurrentPlaceholder)
+                        showOnlyCurrentPlaceholder: @js($showOnlyCurrentPlaceholder),
+                        debounce: @js($isLiveDebounced()) ? @js($getLiveDebounce()) : null,
                     })"
                     x-init="$nextTick(() => { init() })"
                     x-on:click.away="blur()"
