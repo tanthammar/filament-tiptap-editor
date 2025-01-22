@@ -49,7 +49,7 @@
                         customDocument: @js($customDocument),
                         nodePlaceholders: @js($nodePlaceholders),
                         showOnlyCurrentPlaceholder: @js($showOnlyCurrentPlaceholder),
-                        debounce: @js($isLiveDebounced()) ? @js($getLiveDebounce()) : null,
+                        debounce: @js($getLiveDebounce()),
                     })"
                     x-init="$nextTick(() => { init() })"
                     x-on:click.away="blur()"
