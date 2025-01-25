@@ -526,6 +526,7 @@ export default function tiptap({
                 .chain()
                 .focus()
                 .setTextSelection({from: link.coordinates[0].$from.pos, to: link.coordinates[0].$to.pos})
+                .extendMarkRange('link')
                 .setLink({
                     href: link.href,
                     id: link.id ?? null,
