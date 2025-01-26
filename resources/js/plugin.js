@@ -229,7 +229,7 @@ export default function tiptap({
                     tippyOptions: {
                         duration: [500, 0],
                         maxWidth: 'none',
-                        placement: 'top',
+                        placement: 'bottom',
                         theme: 'tiptap-editor-bubble',
                         interactive: true,
                         appendTo: this.$refs.element,

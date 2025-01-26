@@ -17,7 +17,7 @@
     :component="$getFieldWrapperView()"
     :field="$field"
 >
-    <div class="flex gap-3">
+    <div class="isolate z-10 flex gap-3">
         <div class="flex-1">
             <div
                 @class([
