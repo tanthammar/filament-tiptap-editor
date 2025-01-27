@@ -40,7 +40,7 @@
                     x-data="tiptap({
                         state: $wire.{{ $applyStateBindingModifiers("entangle('{$statePath}')", isOptimisticallyLive: true) }},
                         statePath: '{{ $statePath }}',
-                        tools: @js($tools),
+                        tools: @js(collect($tools)->merge($bubbleMenuTools)->unique()->values()->all()),
                         disabled: @js($isDisabled),
                         locale: '{{ app()->getLocale() }}',
                         floatingMenuTools: @js($floatingMenuTools),
