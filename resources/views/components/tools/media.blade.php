@@ -26,10 +26,11 @@
                 title: media.title || '',
                 width: media.width || '',
                 height: media.height || '',
+                id: media.id || '',
                 lazy: media.lazy || false,
                 media: media.media || '',
             };
-
+    
             {{ $action }}
         }
     }"

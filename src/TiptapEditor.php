@@ -3,20 +3,29 @@
 namespace FilamentTiptapEditor;
 
 use Closure;
+use Exception;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Concerns\HasExtraInputAttributes;
 use Filament\Forms\Components\Concerns\HasPlaceholder;
 use Filament\Forms\Components\Field;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Support\Concerns\HasExtraAlpineAttributes;
+use FilamentTiptapEditor\Actions\EditMediaAction;
+use FilamentTiptapEditor\Actions\GridBuilderAction;
+use FilamentTiptapEditor\Actions\OEmbedAction;
 use FilamentTiptapEditor\Actions\SourceAction;
 use FilamentTiptapEditor\Concerns\CanStoreOutput;
 use FilamentTiptapEditor\Concerns\HasCustomActions;
 use FilamentTiptapEditor\Concerns\InteractsWithMedia;
 use FilamentTiptapEditor\Concerns\InteractsWithMenus;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Js;
 use Illuminate\Support\Str;
 use JsonException;
 use Livewire\Component;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Throwable;
 
 class TiptapEditor extends Field
@@ -55,6 +64,8 @@ class TiptapEditor extends Field
 
     protected array | bool | null $showOnlyCurrentPlaceholder = false;
 
+    protected ?string $recordAttribute = null;
+
     protected array $gridLayouts = [
         'two-columns',
         'three-columns',
@@ -87,7 +98,9 @@ class TiptapEditor extends Field
                 $state = tiptap_converter()->asJSON($state, decoded: true);
             }
 
-            $state = $this->renderBlockPreviews($state, $component);
+            $state = $component->generateImageUrls($state);
+
+            $state = $component->renderBlockPreviews($state);
 
             $component->state($state);
         });
@@ -96,26 +109,34 @@ class TiptapEditor extends Field
             $livewire->validateOnly($component->getStatePath());
         });
 
-        $this->dehydrateStateUsing(function (TiptapEditor $component, string | array | null $state): string | array | null {
+        $this->beforeStateDehydrated(function (TiptapEditor $component, string | array | null $state) {
+            if (! is_array($state)) {
+                return;
+            }
 
+            $component->state($component->processImages($state));
+        });
+
+        $this->dehydrateStateUsing(function (TiptapEditor $component, string | array | null $state): string | array | null {
             if (! $state) {
                 return null;
             }
 
-            if ($this->expectsJSON()) {
-                if (! is_array($state)) {
-                    $state = tiptap_converter()->asJSON($state, decoded: true);
-                }
-
-                return $this->decodeBlocksBeforeSave($state);
+            if (! $component->expectsJSON()) {
+                throw new Exception('TipTap content should be stored in JSON only, in order to process media and blocks correctly.');
             }
 
-            if ($this->expectsText()) {
-                return tiptap_converter()->asText($state);
+            if (! is_array($state)) {
+                $state = tiptap_converter()->asJSON($state, decoded: true);
             }
 
-            return tiptap_converter()->asHTML($state);
+            $state = $component->decodeBlocks($state);
+            $state = $component->removeImageUrls($state);
+
+            return $state;
         });
+
+        $this->saveRelationshipsUsing(fn (TiptapEditor $component, Model $record) => $record->wasRecentlyCreated && $component->processImages());
 
         $this->registerListeners([
             'tiptap::setGridBuilderContent' => [
@@ -173,6 +194,7 @@ class TiptapEditor extends Field
             SourceAction::make(),
             fn (): Action => $this->getOEmbedAction(),
             fn (): Action => $this->getGridBuilderAction(),
+            fn (): Action => $this->getFileAttachmentUrlAction(),
             fn (): Action => $this->getLinkAction(),
             fn (): Action => $this->getMediaAction(),
             fn (): Action => $this->getInsertBlockAction(),
@@ -548,5 +570,184 @@ class TiptapEditor extends Field
     public function getGridLayouts(): array
     {
         return $this->gridLayouts;
+    }
+
+    public function recordAttribute(?string $attribute): static
+    {
+        $this->recordAttribute = $attribute;
+
+        return $this;
+    }
+
+    public function getRecordAttribute(): string
+    {
+        return $this->recordAttribute ?? $this->getName();
+    }
+
+    public function getFileAttachmentUrlAction(): Action
+    {
+        return Action::make('getFileAttachmentUrl')
+            ->action(function (TiptapEditor $component, Component & HasForms $livewire, array $arguments): ?string {
+                $livewire->skipRender();
+
+                $file = $livewire->getFormComponentFileAttachment("{$component->getStatePath()}.{$arguments['fileKey']}");
+
+                if (! $file) {
+                    return null;
+                }
+
+                return $file->temporaryUrl();
+            });
+    }
+
+    public function generateImageUrls(array $document, ?Collection $images = null): array
+    {
+        $record = $this->getRecord();
+
+        $images ??= ($record instanceof HasMedia) ?
+            $record->getMedia(collectionName: $this->getRecordAttribute())->keyBy('uuid') :
+            collect();
+
+        $content = $document['content'] ?? [];
+
+        foreach ($content as $blockIndex => $block) {
+            if (array_key_exists('content', $block)) {
+                $content[$blockIndex] = $this->generateImageUrls($block, $images);
+            }
+
+            if (($block['type'] ?? null) !== 'image') {
+                continue;
+            }
+
+            $id = $block['attrs']['id'] ?? null;
+
+            if (blank($id)) {
+                continue;
+            }
+
+            if ($images->has($id)) {
+                $content[$blockIndex]['attrs']['src'] = $images->get($id)->getTemporaryUrl(now()->addDay());
+
+                continue;
+            }
+
+            $image = Media::findByUuid($id);
+
+            if (! $image) {
+                continue;
+            }
+
+            $images->put($id, $image);
+
+            $content[$blockIndex]['attrs']['src'] = $image->getTemporaryUrl(now()->addDay());
+        }
+
+        $document['content'] = $content;
+
+        return $document;
+    }
+
+    public function removeImageUrls(array $document): array
+    {
+        $content = $document['content'] ?? [];
+
+        foreach ($content as $blockIndex => $block) {
+            if (array_key_exists('content', $block)) {
+                $content[$blockIndex] = $this->removeImageUrls($block);
+            }
+
+            if (($block['type'] ?? null) !== 'image') {
+                continue;
+            }
+
+            if (! array_key_exists('attrs', $block)) {
+                continue;
+            }
+
+            if (($block['attrs']['class'] ?? null) === 'filament-tiptap-loading-image') {
+                unset($content[$blockIndex]);
+
+                continue;
+            }
+
+            if (! array_key_exists('src', $block['attrs'])) {
+                continue;
+            }
+
+            $id = $block['attrs']['id'] ?? null;
+
+            if (blank($id)) {
+                continue;
+            }
+
+            unset($content[$blockIndex]['attrs']['src']);
+        }
+
+        $document['content'] = $content;
+
+        return $document;
+    }
+
+    public function processImages(?array $originalState = null): array
+    {
+        $record = $this->getRecord();
+
+        $originalState ??= (data_get($record, $this->getRecordAttribute()) ?? $this->getState());
+
+        if (! ($record instanceof HasMedia)) {
+            return $originalState ?? [];
+        }
+
+        $images = $record->getMedia(collectionName: $this->getRecordAttribute())->keyBy('uuid');
+        $unusedImageKeys = $images->keys()->all();
+
+        $livewire = $this->getLivewire();
+
+        [$newState, $unusedImageKeys] = tiptap_converter()->saveImages(
+            $originalState,
+            disk: $this->getDisk(),
+            record: $record,
+            recordAttribute: $this->getRecordAttribute(),
+            newImages: $this->getTemporaryImages(),
+            existingImages: $images,
+            unusedImageKeys: $unusedImageKeys,
+        );
+
+        Media::query()
+            ->whereIn('uuid', $unusedImageKeys)
+            ->delete();
+
+        data_forget($livewire->componentFileAttachments, $this->getStatePath());
+
+        // We need to save the new state back to the record if the image IDs have changed.
+        if (
+            $record->wasRecentlyCreated &&
+            ($originalState !== $newState)
+        ) {
+            $recordAttribute = $this->getRecordAttribute();
+
+            if (str($recordAttribute)->contains('.')) {
+                $attributeState = $record->getAttribute((string) str($recordAttribute)->before('.'));
+
+                $record->fill([
+                    ((string) str($recordAttribute)->before('.')) => data_set(
+                        $attributeState,
+                        (string) str($recordAttribute)->after('.'),
+                        $newState,
+                    ),
+                ]);
+            } else {
+                $record->{$recordAttribute} = $newState;
+            }
+
+            $record->save();
+        }
+
+        return $newState;
+    }
+
+    public function getTemporaryImages(): array
+    {
+        return data_get($this->getLivewire()->componentFileAttachments, $this->getStatePath()) ?? [];
     }
 }

@@ -50,6 +50,7 @@ import {
     Hurdle,
     Video,
     TiptapBlock,
+    LocalFilesExtension,
     DragAndDropExtension,
     ClassExtension,
     IdExtension,
@@ -78,7 +79,7 @@ let coreExtensions = {
     details: [Details, DetailsSummary, DetailsContent],
     grid: [Grid, GridColumn],
     'grid-builder': [GridBuilder, GridBuilderColumn],
-    heading: [Heading.configure({levels: [1, 2, 3, 4, 5, 6]})],
+    heading: [Heading.configure({ levels: [1, 2, 3, 4, 5, 6] })],
     highlight: [Highlight],
     hr: [HorizontalRule],
     hurdle: [Hurdle],
@@ -100,12 +101,12 @@ let coreExtensions = {
     strike: [Strike],
     subscript: [Subscript],
     superscript: [Superscript],
-    table: [Table.configure({resizable: true}), TableHeader, TableCell, TableRow],
+    table: [Table.configure({ resizable: true }), TableHeader, TableCell, TableRow],
     underline: [Underline],
 };
 
 let customExtensions = window.TiptapEditorExtensions || {};
-let editorExtensions = {...coreExtensions, ...customExtensions};
+let editorExtensions = { ...coreExtensions, ...customExtensions };
 
 const localeSwitcher = document.getElementById('activeLocale');
 if (localeSwitcher) {
@@ -151,17 +152,18 @@ Livewire.on('updateBlockFromAction', (event) => {
 })
 
 export default function tiptap({
-   state,
-   statePath,
-   tools = [],
-   disabled = false,
-   locale = 'en',
-   floatingMenuTools = [],
-   placeholder = null,
-   mergeTags = [],
-   customDocument = null,
-   nodePlaceholders = [],
-   showOnlyCurrentPlaceholder = true,
+    state,
+    statePath,
+    tools = [],
+    disabled = false,
+    locale = 'en',
+    floatingMenuTools = [],
+    placeholder = null,
+    mergeTags = [],
+    uploadingMessage,
+    customDocument = null,
+    nodePlaceholders = [],
+    showOnlyCurrentPlaceholder = true,
 }) {
     let editor = null;
 
@@ -200,6 +202,13 @@ export default function tiptap({
                 DragAndDropExtension,
                 ClassExtension,
                 IdExtension,
+                LocalFilesExtension.configure({
+                    getFileAttachmentUrl: (fileKey) =>
+                        this.$wire.mountFormComponentAction(statePath, 'getFileAttachmentUrl', { fileKey }),
+                    statePath,
+                    upload: this.$wire.upload,
+                    uploadingMessage,
+                }),
                 StyleExtension,
                 StatePath.configure({
                     statePath: statePath
@@ -392,9 +401,9 @@ export default function tiptap({
         },
         updateEditorContent(content) {
             if (editor.isEditable) {
-                const {from, to} = editor.state.selection;
+                const { from, to } = editor.state.selection;
                 editor.commands.setContent(content, true);
-                editor.chain().focus().setTextSelection({from, to}).run();
+                editor.chain().focus().setTextSelection({ from, to }).run();
             }
         },
         refreshEditorContent() {
@@ -442,7 +451,7 @@ export default function tiptap({
 
             if (media) {
                 const src = media?.url || media?.src;
-                const imageTypes = ['jpg', 'jpeg', 'svg', 'png', 'webp', 'gif', 'avif', 'jxl', 'heic'];
+                const imageTypes = ['jpg', 'jpeg', 'svg', 'png', 'webp', 'gif']
 
                 const regex = /.*\.([a-zA-Z]*)\??/;
                 const match = regex.exec(src.toLowerCase());
@@ -457,6 +466,7 @@ export default function tiptap({
                             title: media?.title,
                             width: media?.width,
                             height: media?.height,
+                            id: media?.id,
                             lazy: media?.lazy,
                             srcset: media?.srcset,
                             sizes: media?.sizes,

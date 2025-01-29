@@ -2,9 +2,17 @@
 
 namespace FilamentTiptapEditor;
 
+use FilamentTiptapEditor\Exceptions\ImagesNotResolvableException;
 use FilamentTiptapEditor\Extensions\Extensions;
 use FilamentTiptapEditor\Extensions\Marks;
 use FilamentTiptapEditor\Extensions\Nodes;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Tiptap\Editor;
 use Tiptap\Extensions\StarterKit;
 use Tiptap\Marks\Highlight;
@@ -27,6 +35,10 @@ class TiptapConverter
     protected bool $tableOfContents = false;
 
     protected array $mergeTagsMap = [];
+
+    protected ?Model $record = null;
+
+    protected ?string $recordAttribute = null;
 
     public function getEditor(): Editor
     {
@@ -100,7 +112,7 @@ class TiptapConverter
         return $this;
     }
 
-    public function asHTML(string | array | null $content, bool $toc = false, int $maxDepth = 3): string
+    public function asHTML(string | array $content, bool $toc = false, int $maxDepth = 3, array $newImages = []): string
     {
         if (! $content) {
             return '';
@@ -116,9 +128,11 @@ class TiptapConverter
             $this->parseMergeTags($editor);
         }
 
+        $this->generateImageUrls($editor, $newImages);
+
         /*
-         * Temporary fix for Tiptap Serializer bug duplicating code block tags
-         */
+        * Temporary fix for Tiptap Serializer bug duplicating code block tags
+        */
         return str_replace('</code></pre></code></pre>', '</code></pre>', $editor->getHTML());
     }
 
@@ -310,5 +324,172 @@ class TiptapConverter
         $result .= '</ul>';
 
         return $result;
+    }
+
+    public function record(?Model $record, ?string $attribute): static
+    {
+        $this->record = $record;
+        $this->recordAttribute = $attribute;
+
+        return $this;
+    }
+
+    public function getRecord(): ?Model
+    {
+        return $this->record;
+    }
+
+    public function getRecordAttribute(): ?string
+    {
+        return $this->recordAttribute;
+    }
+
+    public function saveImages(array $document, string $disk, HasMedia $record, string $recordAttribute, array $newImages, ?Collection $existingImages = null, array $unusedImageKeys = []): array
+    {
+        $existingImages ??= collect([]);
+
+        $document['content'] ??= [];
+
+        return [json_decode($this->getEditor()->setContent($document)->descendants(function (&$node) use ($disk, $existingImages, $newImages, $record, $recordAttribute, &$unusedImageKeys) {
+            if ($node->type !== 'image') {
+                return;
+            }
+
+            $id = $node->attrs->id ?? null;
+
+            if (blank($id)) {
+                return;
+            }
+
+            if (($unusedImageIndex = array_search($id, $unusedImageKeys)) !== false) {
+                unset($unusedImageKeys[$unusedImageIndex]);
+            }
+
+            if ($existingImages->has($id)) {
+                return;
+            }
+
+            if (array_key_exists($id, $newImages)) {
+                $newImage = $newImages[$id];
+
+                $content = ($newImage instanceof TemporaryUploadedFile) ?
+                    $newImage->get() :
+                    FileUploadConfiguration::storage()->get($newImage['path']);
+
+                $extension = ($newImage instanceof TemporaryUploadedFile) ?
+                    $newImage->getClientOriginalExtension() :
+                    $newImage['extension'];
+
+                $image = $record
+                    ->addMediaFromString($content)
+                    ->usingFileName(((string) Str::ulid()) . '.' . $extension)
+                    ->toMediaCollection($recordAttribute, diskName: $disk);
+
+                $existingImages->put($image->uuid, $image);
+
+                $node->attrs->id = $image->uuid;
+
+                return;
+            }
+
+            $existingImage = Media::findByUuid($id);
+
+            if (! $existingImage) {
+                return;
+            }
+
+            $newImage = $existingImage->copy($record, collectionName: $recordAttribute, diskName: $disk);
+
+            $existingImages->put($newImage->uuid, $newImage);
+
+            $node->attrs->id = $newImage->uuid;
+        })->getJSON(), associative: true), $unusedImageKeys];
+    }
+
+    public function copyImagesToNewRecord(array $content, Model $replica, string $disk): array
+    {
+        $editor = $this->getEditor()->setContent($content);
+
+        $record = $this->getRecord();
+
+        $recordAttribute = $this->getRecordAttribute();
+
+        $images = $record instanceof HasMedia ?
+            $record->getMedia(collectionName: $recordAttribute)->keyBy('uuid') :
+            collect([]);
+
+        $editor->descendants(function (&$node) use ($disk, $images, $record, $recordAttribute, $replica) {
+            if ($node->type !== 'image') {
+                return;
+            }
+
+            $id = $node->attrs?->id ?? null;
+
+            if (blank($id)) {
+                return;
+            }
+
+            if (
+                (! ($record instanceof HasMedia)) ||
+                blank($recordAttribute)
+            ) {
+                throw new ImagesNotResolvableException("Image [{$id}] attempted to be replicated, but the TipTap converter was not configured with the media record and attribute.");
+            }
+
+            if (! $images->has($id)) {
+                return;
+            }
+
+            $newImage = $images->get($id)->copy($replica, collectionName: $recordAttribute, diskName: $disk);
+
+            $node->attrs->id = $newImage->uuid;
+        });
+
+        return json_decode($editor->getJSON(), associative: true);
+    }
+
+    public function generateImageUrls(Editor $editor, array $newImages = []): Editor
+    {
+        $record = $this->getRecord();
+
+        $recordAttribute = $this->getRecordAttribute();
+
+        $images = $record instanceof HasMedia ? $record->getMedia(collectionName: $recordAttribute)->keyBy('uuid') : collect([]);
+
+        $editor->descendants(function (&$node) use ($images, $newImages) {
+            if ($node->type !== 'image') {
+                return;
+            }
+
+            $id = $node->attrs?->id ?? null;
+
+            if (blank($id)) {
+                return;
+            }
+
+            unset($node->attrs->id);
+
+            if ($newImage = ($newImages[$id] ?? null)) {
+                $node->attrs->src = $newImage->temporaryUrl();
+
+                return;
+            }
+
+            if (! $images->has($id)) {
+                return;
+            }
+
+            $image = $images->get($id);
+
+            if (config("filesystems.disks.{$image->disk}.media_library_visibility") === 'public') {
+                $node->attrs->src = $image->getUrl();
+
+                return;
+            }
+
+            $node->attrs->src = $image->getTemporaryUrl(now()->addDay());
+        });
+
+        return $editor;
     }
 }
