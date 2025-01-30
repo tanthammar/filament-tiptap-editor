@@ -559,6 +559,8 @@ class TiptapEditor extends Field
     public function cleanUpDeletedImages(bool $condition = true): static
     {
         $this->cleanUpImagesOnUpdated = $condition;
+
+        return $this;
     }
 
     private function deleteRemovedImages(array $old, array $state, TiptapEditor $component): void
