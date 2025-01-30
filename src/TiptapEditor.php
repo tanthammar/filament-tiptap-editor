@@ -13,6 +13,7 @@ use FilamentTiptapEditor\Concerns\CanStoreOutput;
 use FilamentTiptapEditor\Concerns\HasCustomActions;
 use FilamentTiptapEditor\Concerns\InteractsWithMedia;
 use FilamentTiptapEditor\Concerns\InteractsWithMenus;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Js;
 use Illuminate\Support\Str;
 use JsonException;
@@ -92,8 +93,30 @@ class TiptapEditor extends Field
             $component->state($state);
         });
 
-        $this->afterStateUpdated(function (TiptapEditor $component, Component $livewire): void {
+        $this->afterStateUpdated(function (TiptapEditor $component, Component $livewire, mixed $state, mixed $old): void {
+
             $livewire->validateOnly($component->getStatePath());
+
+            $findImageSrcs = static function ($content) use (&$findImageSrcs) {
+                return collect($content)->reduce(function ($carry, $node) use ($findImageSrcs) {
+                    if ($node['type'] === 'image') {
+                        $carry[] = $node['attrs']['src'];
+                    }
+
+                    if (isset($node['content'])) {
+                        $carry = array_merge($carry, $findImageSrcs($node['content']));
+                    }
+
+                    return $carry;
+                }, []);
+            };
+
+            $oldImages = collect($findImageSrcs($old['content'] ?? []));
+            $newImages = collect($findImageSrcs($state['content'] ?? []));
+
+            $imagesToDelete = $oldImages->diff($newImages);
+
+            $imagesToDelete->each(fn ($imageUrl) => Storage::disk($component->getDisk())->delete($imageUrl));
         });
 
         $this->dehydrateStateUsing(function (TiptapEditor $component, string | array | null $state): string | array | null {
