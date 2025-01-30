@@ -95,7 +95,6 @@ class TiptapEditor extends Field
 
         $this->afterStateUpdated(function (TiptapEditor $component, Component $livewire, array $state, array $old): void {
             $livewire->validateOnly($component->getStatePath());
-            $this->deleteRemovedImages($old, $state, $component);
         });
 
         $this->dehydrateStateUsing(function (TiptapEditor $component, string | array | null $state): string | array | null {
@@ -550,36 +549,5 @@ class TiptapEditor extends Field
     public function getGridLayouts(): array
     {
         return $this->gridLayouts;
-    }
-
-    private function deleteRemovedImages(array $old, array $state, TiptapEditor $component): void
-    {
-        $filterImageUrls = static function ($content) {
-            $imageUrls = [];
-            array_walk_recursive($content, static function ($value, $key) use (&$imageUrls) {
-                if ($key === 'src' && isset($value)) {
-                    $imageUrls[] = $value;
-                }
-            });
-
-            return $imageUrls;
-        };
-
-        $oldImages = collect($filterImageUrls($old['content'] ?? []));
-        $newImages = collect($filterImageUrls($state['content'] ?? []));
-        $imagesToDelete = $oldImages->diff($newImages);
-
-        $dir = $component->getDirectory();
-        $disc = $component->getDisk();
-
-        $imagesToDelete->each(function ($imageUrl) use ($dir, $disc) {
-            $str = data_get(parse_url($imageUrl), 'path', '');
-
-            $relativePath = Str::of($str)
-                ->after($dir)
-                ->prepend($dir);
-
-            Storage::disk($disc)->delete($relativePath);
-        });
     }
 }
