@@ -13,6 +13,7 @@ use FilamentTiptapEditor\Concerns\CanStoreOutput;
 use FilamentTiptapEditor\Concerns\HasCustomActions;
 use FilamentTiptapEditor\Concerns\InteractsWithMedia;
 use FilamentTiptapEditor\Concerns\InteractsWithMenus;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Js;
 use Illuminate\Support\Str;
 use JsonException;
@@ -55,6 +56,8 @@ class TiptapEditor extends Field
 
     protected array | bool | null $showOnlyCurrentPlaceholder = false;
 
+    protected bool $cleanUpImagesOnUpdated = false;
+
     protected array $gridLayouts = [
         'two-columns',
         'three-columns',
@@ -92,8 +95,11 @@ class TiptapEditor extends Field
             $component->state($state);
         });
 
-        $this->afterStateUpdated(function (TiptapEditor $component, Component $livewire): void {
+        $this->afterStateUpdated(function (TiptapEditor $component, Component $livewire, array $old, array $state): void {
+
             $livewire->validateOnly($component->getStatePath());
+
+            $this->deleteRemovedImages($old, $state, $component);
         });
 
         $this->dehydrateStateUsing(function (TiptapEditor $component, string | array | null $state): string | array | null {
@@ -548,5 +554,45 @@ class TiptapEditor extends Field
     public function getGridLayouts(): array
     {
         return $this->gridLayouts;
+    }
+
+    public function cleanUpDeletedImages(bool $condition = true): static
+    {
+        $this->cleanUpImagesOnUpdated = $condition;
+    }
+
+    private function deleteRemovedImages(array $old, array $state, TiptapEditor $component): void
+    {
+        if (! $this->cleanUpImagesOnUpdated) {
+            return;
+        }
+
+        $filterImageUrls = static function ($content) {
+            $imageUrls = [];
+            array_walk_recursive($content, static function ($value, $key) use (&$imageUrls) {
+                if ($key === 'src' && isset($value)) {
+                    $imageUrls[] = $value;
+                }
+            });
+
+            return $imageUrls;
+        };
+
+        $oldImages = collect($filterImageUrls($old['content'] ?? []));
+        $newImages = collect($filterImageUrls($state['content'] ?? []));
+        $imagesToDelete = $oldImages->diff($newImages);
+
+        $dir = $component->getDirectory();
+        $disc = $component->getDisk();
+
+        $imagesToDelete->each(function ($imageUrl) use ($dir, $disc) {
+            $str = data_get(parse_url($imageUrl), 'path', '');
+
+            $relativePath = Str::of($str)
+                ->after($dir)
+                ->prepend($dir);
+
+            Storage::disk($disc)->delete($relativePath);
+        });
     }
 }
