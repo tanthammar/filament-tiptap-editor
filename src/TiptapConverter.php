@@ -344,7 +344,10 @@ class TiptapConverter
         return $this->recordAttribute;
     }
 
-    public function saveImages(array $document, string $disk, HasMedia $record, string $recordAttribute, array $newImages, ?Collection $existingImages = null, array $unusedImageKeys = []): array
+    /**
+     * @throws \JsonException
+     */
+    public function saveImages(?array $document, string $disk, HasMedia $record, string $recordAttribute, array $newImages, ?Collection $existingImages = null, array $unusedImageKeys = []): array
     {
         $existingImages ??= collect([]);
 
@@ -358,6 +361,7 @@ class TiptapConverter
             $id = $node->attrs->id ?? null;
 
             if (blank($id)) {
+                ray('no id');
                 return;
             }
 
@@ -366,10 +370,12 @@ class TiptapConverter
             }
 
             if ($existingImages->has($id)) {
+                ray('existing image has id');
                 return;
             }
 
             if (array_key_exists($id, $newImages)) {
+                ray('saving new image');
                 $newImage = $newImages[$id];
 
                 $content = ($newImage instanceof TemporaryUploadedFile) ?
@@ -403,7 +409,7 @@ class TiptapConverter
             $existingImages->put($newImage->uuid, $newImage);
 
             $node->attrs->id = $newImage->uuid;
-        })->getJSON(), associative: true), $unusedImageKeys];
+        })->getJSON(), true, 512, JSON_THROW_ON_ERROR), $unusedImageKeys];
     }
 
     public function copyImagesToNewRecord(array $content, Model $replica, string $disk): array

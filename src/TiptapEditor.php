@@ -3,16 +3,12 @@
 namespace FilamentTiptapEditor;
 
 use Closure;
-use Exception;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Concerns\HasExtraInputAttributes;
 use Filament\Forms\Components\Concerns\HasPlaceholder;
 use Filament\Forms\Components\Field;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Support\Concerns\HasExtraAlpineAttributes;
-use FilamentTiptapEditor\Actions\EditMediaAction;
-use FilamentTiptapEditor\Actions\GridBuilderAction;
-use FilamentTiptapEditor\Actions\OEmbedAction;
 use FilamentTiptapEditor\Actions\SourceAction;
 use FilamentTiptapEditor\Concerns\CanStoreOutput;
 use FilamentTiptapEditor\Concerns\HasCustomActions;
@@ -100,7 +96,7 @@ class TiptapEditor extends Field
 
             $state = $component->generateImageUrls($state);
 
-            $state = $component->renderBlockPreviews($state);
+            $state = $component->renderBlockPreviews($state, $component);
 
             $component->state($state);
         });
@@ -114,6 +110,7 @@ class TiptapEditor extends Field
                 return;
             }
 
+            ray('beforeStateDehydrated');
             $component->state($component->processImages($state));
         });
 
@@ -123,17 +120,16 @@ class TiptapEditor extends Field
             }
 
             if (! $component->expectsJSON()) {
-                throw new Exception('TipTap content should be stored in JSON only, in order to process media and blocks correctly.');
+                throw new \RuntimeException('TipTap content should be stored in JSON only, in order to process media and blocks correctly.');
             }
 
             if (! is_array($state)) {
                 $state = tiptap_converter()->asJSON($state, decoded: true);
             }
 
-            $state = $component->decodeBlocks($state);
-            $state = $component->removeImageUrls($state);
+            $state = $this->decodeBlocksBeforeSave($state);
 
-            return $state;
+            return $component->removeImageUrls($state);
         });
 
         $this->saveRelationshipsUsing(fn (TiptapEditor $component, Model $record) => $record->wasRecentlyCreated && $component->processImages());
@@ -688,13 +684,17 @@ class TiptapEditor extends Field
         return $document;
     }
 
+    /**
+     * @throws JsonException
+     */
     public function processImages(?array $originalState = null): array
     {
         $record = $this->getRecord();
 
+
         $originalState ??= (data_get($record, $this->getRecordAttribute()) ?? $this->getState());
 
-        if (! ($record instanceof HasMedia)) {
+        if (! ($record instanceof HasMedia) || blank($originalState)) {
             return $originalState ?? [];
         }
 
