@@ -156,6 +156,7 @@ export default function tiptap({
    tools = [],
    disabled = false,
    locale = 'en',
+   bubbleMenuTools = [],
    floatingMenuTools = [],
    placeholder = null,
    mergeTags = [],
@@ -175,6 +176,7 @@ export default function tiptap({
         updatedAt: Date.now(),
         disabled: disabled,
         locale: locale,
+        bubbleMenuTools: bubbleMenuTools,
         floatingMenuTools: floatingMenuTools,
         getExtensions() {
             const tools = this.tools.map((tool) => {
@@ -229,7 +231,7 @@ export default function tiptap({
                     tippyOptions: {
                         duration: [500, 0],
                         maxWidth: 'none',
-                        placement: 'top',
+                        placement: 'auto',
                         theme: 'tiptap-editor-bubble',
                         interactive: true,
                         appendTo: this.$refs.element,
@@ -273,6 +275,14 @@ export default function tiptap({
                     }))
 
                     this.floatingMenuTools.forEach((tool) => {
+                        if (!tools.includes(tool)) {
+                            tools.push(tool);
+                        }
+                    });
+                }
+
+                if (this.bubbleMenuTools.length) {
+                    this.bubbleMenuTools.forEach((tool) => {
                         if (!tools.includes(tool)) {
                             tools.push(tool);
                         }
