@@ -66,7 +66,7 @@
                     x-on:insert-block.window="insertBlock($event)"
                     x-on:update-block.window="updateBlock($event)"
                     x-on:open-block-settings.window="openBlockSettings($event)"
-                    x-on:delete-block.window="deleteBlock()"
+                    x-on:delete-block.window="deleteBlock($event)"
                     x-on:locale-change.window="updateLocale($event)"
                     x-trap.noscroll="fullScreenMode"
                 >

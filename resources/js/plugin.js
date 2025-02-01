@@ -187,7 +187,6 @@ export default function tiptap({
                 return tool.id;
             })
 
-
             let extensions = [
                 customDocument ? Document.extend({
                     content: customDocument
@@ -625,7 +624,8 @@ export default function tiptap({
                 editor.commands.focus();
             }
         },
-        deleteBlock() {
+        deleteBlock(event) {
+            if (event.detail.statePath !== this.statePath) return
             editor.commands.removeBlock();
         }
     }
