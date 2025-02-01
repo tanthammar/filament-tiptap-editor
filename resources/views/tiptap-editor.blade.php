@@ -43,6 +43,7 @@
                         tools: @js($tools),
                         disabled: @js($isDisabled),
                         locale: '{{ app()->getLocale() }}',
+                        bubbleMenuTools: @js($bubbleMenuTools),
                         floatingMenuTools: @js($floatingMenuTools),
                         placeholder: @js($getPlaceholder()),
                         mergeTags: @js($mergeTags),
