@@ -54,6 +54,7 @@
 }
 
 .tiptap-prosemirror-wrapper {
+    word-break: break-all;
     &.prosemirror-w-sm { padding: 0 max(theme('padding.4'), calc((100% - theme('maxWidth.sm')) / 2)); }
     &.prosemirror-w-md { padding: 0 max(theme('padding.4'), calc((100% - theme('maxWidth.md')) / 2)); }
     &.prosemirror-w-lg { padding: 0 max(theme('padding.4'), calc((100% - theme('maxWidth.lg')) / 2)); }
@@ -695,4 +696,8 @@
 
 span[data-type="mergeTag"] {
     @apply bg-gray-100 dark:bg-gray-800 px-2 py-1 mx-1 rounded;
+}
+
+.tiptap-editor .mention  {
+    @apply bg-primary-600 bg-opacity-10 text-primary-600 px-1 py-0.5 rounded-md box-decoration-clone;
 }

@@ -11,6 +11,15 @@
     $customDocument = $getCustomDocument();
     $nodePlaceholders = $getNodePlaceholders();
     $showOnlyCurrentPlaceholder = $getShowOnlyCurrentPlaceholder();
+    // Mentions
+    $mentionItems = $getMentionItems();
+    $emptyMentionItemsMessage = $getEmptyMentionItemsMessage();
+    $mentionItemsPlaceholder = $getMentionItemsPlaceholder();
+    $getMentionItemsUsingEnabled = $getMentionItemsUsingEnabled();
+    $maxMentionItems = $getMaxMentionItems();
+    $mentionTrigger = $getMentionTrigger();
+    $mentionDebounce = $getMentionDebounce();
+    $mentionSearchStrategy = $getMentionSearchStrategy();
 @endphp
 
 <x-dynamic-component
@@ -32,23 +41,36 @@
             >
                 <div
                     wire:ignore
-                    x-ignore
-                    ax-load
-                    ax-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('tiptap', 'awcodes/tiptap-editor') }}"
+                    x-load
+                    x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('tiptap', 'awcodes/tiptap-editor') }}"
                     class="isolate relative z-10 tiptap-wrapper rounded-md bg-white dark:bg-gray-900 focus-within:ring focus-within:ring-primary-500 focus-within:z-20"
                     x-bind:class="{ 'tiptap-fullscreen': fullScreenMode }"
                     x-data="tiptap({
-                        state: $wire.{{ $applyStateBindingModifiers("entangle('{$statePath}')", isOptimisticallyLive: true) }},
+                        state: $wire.{{ $applyStateBindingModifiers("\$entangle('{$statePath}')", isOptimisticallyLive: true) }},
                         statePath: '{{ $statePath }}',
                         tools: @js(collect($tools)->merge($bubbleMenuTools)->unique()->values()->all()),
                         disabled: @js($isDisabled),
                         locale: '{{ app()->getLocale() }}',
+                        bubbleMenuTools: @js($bubbleMenuTools),
                         floatingMenuTools: @js($floatingMenuTools),
                         placeholder: @js($getPlaceholder()),
                         mergeTags: @js($mergeTags),
                         customDocument: @js($customDocument),
                         nodePlaceholders: @js($nodePlaceholders),
-                        showOnlyCurrentPlaceholder: @js($showOnlyCurrentPlaceholder)
+                        showOnlyCurrentPlaceholder: @js($showOnlyCurrentPlaceholder),
+                        debounce: @js($getLiveDebounce()),
+                        mentionItems: @js($mentionItems),
+                        emptyMentionItemsMessage: @js($emptyMentionItemsMessage),
+                        mentionItemsPlaceholder: @js($mentionItemsPlaceholder),
+                        maxMentionItems: @js($maxMentionItems),
+                        mentionTrigger: @js($mentionTrigger),
+                        livewireId: @js($this->getId()),
+                        getMentionItemsUsingEnabled: @js($getMentionItemsUsingEnabled),
+                        getSearchResultsUsing: async (search) => {
+                          return await $wire.getMentionsItems(@js($statePath), search)
+                        },
+                        mentionDebounce: @js($mentionDebounce),
+                        mentionSearchStrategy: @js($mentionSearchStrategy),
                     })"
                     x-init="$nextTick(() => { init() })"
                     x-on:click.away="blur()"
@@ -65,7 +87,7 @@
                     x-on:insert-block.window="insertBlock($event)"
                     x-on:update-block.window="updateBlock($event)"
                     x-on:open-block-settings.window="openBlockSettings($event)"
-                    x-on:delete-block.window="deleteBlock()"
+                    x-on:delete-block.window="deleteBlock($event)"
                     x-on:locale-change.window="updateLocale($event)"
                     x-trap.noscroll="fullScreenMode"
                 >

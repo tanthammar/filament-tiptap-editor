@@ -11,6 +11,7 @@ use Filament\Support\Concerns\HasExtraAlpineAttributes;
 use FilamentTiptapEditor\Actions\SourceAction;
 use FilamentTiptapEditor\Concerns\CanStoreOutput;
 use FilamentTiptapEditor\Concerns\HasCustomActions;
+use FilamentTiptapEditor\Concerns\HasMentions;
 use FilamentTiptapEditor\Concerns\InteractsWithMedia;
 use FilamentTiptapEditor\Concerns\InteractsWithMenus;
 use Illuminate\Support\Facades\Storage;
@@ -26,6 +27,7 @@ class TiptapEditor extends Field
     use HasCustomActions;
     use HasExtraAlpineAttributes;
     use HasExtraInputAttributes;
+    use HasMentions;
     use HasPlaceholder;
     use InteractsWithMedia;
     use InteractsWithMenus;
@@ -54,7 +56,7 @@ class TiptapEditor extends Field
 
     protected array | Closure | null $nodePlaceholders = null;
 
-    protected array | bool | null $showOnlyCurrentPlaceholder = false;
+    protected bool | Closure | null $showOnlyCurrentPlaceholder = false;
 
     protected array $gridLayouts = [
         'two-columns',

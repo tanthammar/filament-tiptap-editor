@@ -54,6 +54,7 @@ import {
     ClassExtension,
     IdExtension,
     StyleExtension,
+    CustomMention,
     StatePath,
 } from "./extensions";
 import { lowlight } from "lowlight/lib/common";
@@ -156,12 +157,24 @@ export default function tiptap({
    tools = [],
    disabled = false,
    locale = 'en',
+   bubbleMenuTools = [],
    floatingMenuTools = [],
    placeholder = null,
    mergeTags = [],
    customDocument = null,
    nodePlaceholders = [],
    showOnlyCurrentPlaceholder = true,
+   debounce = null,
+   mentionItems = null,
+   emptyMentionItemsMessage = '',
+   mentionItemsPlaceholder = null,
+   maxMentionItems = null,
+   mentionTrigger = '@',
+   livewireId,
+   getMentionItemsUsingEnabled = false,
+   getSearchResultsUsing,
+   mentionDebounce,
+   mentionSearchStrategy,
 }) {
     let editor = null;
 
@@ -175,6 +188,7 @@ export default function tiptap({
         updatedAt: Date.now(),
         disabled: disabled,
         locale: locale,
+        bubbleMenuTools: bubbleMenuTools,
         floatingMenuTools: floatingMenuTools,
         getExtensions() {
             const tools = this.tools.map((tool) => {
@@ -184,7 +198,6 @@ export default function tiptap({
 
                 return tool.id;
             })
-
 
             let extensions = [
                 customDocument ? Document.extend({
@@ -206,6 +219,21 @@ export default function tiptap({
                 }),
                 TiptapBlock,
             ];
+
+            if(mentionItems || getMentionItemsUsingEnabled) {
+                extensions.push(CustomMention.configure({
+                    mentionItems,
+                    emptyMentionItemsMessage,
+                    mentionItemsPlaceholder,
+                    maxMentionItems,
+                    mentionTrigger,
+                    livewireId,
+                    getMentionItemsUsingEnabled,
+                    getSearchResultsUsing,
+                    mentionDebounce,
+                    mentionSearchStrategy,
+                }))
+            }
 
             if ((placeholder || nodePlaceholders) && (!disabled)) {
                 extensions.push(
@@ -229,7 +257,7 @@ export default function tiptap({
                     tippyOptions: {
                         duration: [500, 0],
                         maxWidth: 'none',
-                        placement: 'bottom',
+                        placement: 'auto',
                         theme: 'tiptap-editor-bubble',
                         interactive: true,
                         appendTo: this.$refs.element,
@@ -273,6 +301,14 @@ export default function tiptap({
                     }))
 
                     this.floatingMenuTools.forEach((tool) => {
+                        if (!tools.includes(tool)) {
+                            tools.push(tool);
+                        }
+                    });
+                }
+
+                if (this.bubbleMenuTools.length) {
+                    this.bubbleMenuTools.forEach((tool) => {
                         if (!tools.includes(tool)) {
                             tools.push(tool);
                         }
@@ -361,8 +397,11 @@ export default function tiptap({
                         }
                     },
                     onUpdate({editor}) {
-                        _this.state = editor.isEmpty ? null : editor.getJSON();
                         _this.updatedAt = Date.now();
+                        clearTimeout(_this.timeOut);
+                        _this.timeOut = setTimeout(function(){
+                            _this.state = editor.isEmpty ? null : editor.getJSON();
+                        },debounce ?? 0);
                     },
                     onSelectionUpdate() {
                         _this.updatedAt = Date.now();
@@ -615,7 +654,8 @@ export default function tiptap({
                 editor.commands.focus();
             }
         },
-        deleteBlock() {
+        deleteBlock(event) {
+            if (event.detail.statePath !== this.statePath) return
             editor.commands.removeBlock();
         }
     }
