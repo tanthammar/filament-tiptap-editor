@@ -15,11 +15,13 @@
     $mentionItems = $getMentionItems();
     $emptyMentionItemsMessage = $getEmptyMentionItemsMessage();
     $mentionItemsPlaceholder = $getMentionItemsPlaceholder();
+    $mentionItemsLoading = $getMentionItemsLoading();
     $getMentionItemsUsingEnabled = $getMentionItemsUsingEnabled();
     $maxMentionItems = $getMaxMentionItems();
     $mentionTrigger = $getMentionTrigger();
     $mentionDebounce = $getMentionDebounce();
     $mentionSearchStrategy = $getMentionSearchStrategy();
+    $tippyPlacement = $getTippyPlacement();
 @endphp
 
 <x-dynamic-component
@@ -62,6 +64,7 @@
                         mentionItems: @js($mentionItems),
                         emptyMentionItemsMessage: @js($emptyMentionItemsMessage),
                         mentionItemsPlaceholder: @js($mentionItemsPlaceholder),
+                        mentionItemsLoading: @js($mentionItemsLoading),
                         maxMentionItems: @js($maxMentionItems),
                         mentionTrigger: @js($mentionTrigger),
                         livewireId: @js($this->getId()),
@@ -70,6 +73,7 @@
                           return await $wire.getMentionsItems(@js($statePath), search)
                         },
                         mentionDebounce: @js($mentionDebounce),
+                        tippyPlacement: @js($tippyPlacement),
                         mentionSearchStrategy: @js($mentionSearchStrategy),
                         linkProtocols: @js(config('filament-tiptap-editor.link_protocols')),
                     })"
